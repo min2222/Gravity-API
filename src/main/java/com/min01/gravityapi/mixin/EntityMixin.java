@@ -327,7 +327,7 @@ public abstract class EntityMixin {
     }
     
     // transform the argument to local coordinate
-    @ModifyVariable(
+    /*@ModifyVariable(
         method = "collide",
         at = @At(
             value = "INVOKE_ASSIGN",
@@ -424,9 +424,10 @@ public abstract class EntityMixin {
         if (gravityDirection == Direction.DOWN) return;
         
         cir.setReturnValue(RotationUtil.vecWorldToPlayer(cir.getReturnValue(), gravityDirection));
-    }
+    }*/
     
-    @Redirect(
+    //crash with sodium/lithum
+    /*@Redirect(
         method = "Lnet/minecraft/world/entity/Entity;collideBoundingBox(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Lnet/minecraft/world/level/Level;Ljava/util/List;)Lnet/minecraft/world/phys/Vec3;",
         at = @At(
             value = "INVOKE",
@@ -474,7 +475,7 @@ public abstract class EntityMixin {
         }
         
         return RotationUtil.vecPlayerToWorld(playerMovementX, playerMovementY, playerMovementZ, gravityDirection);
-    }
+    }*/
     
     @ModifyArgs(
         method = "isInWall",

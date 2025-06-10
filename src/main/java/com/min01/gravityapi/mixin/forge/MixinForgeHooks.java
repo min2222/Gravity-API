@@ -20,7 +20,7 @@ public class MixinForgeHooks
                     value = "INVOKE",
                     target = "Lnet/minecraft/core/BlockPos;containing(DDD)Lnet/minecraft/core/BlockPos;",
                     ordinal = 0
-            ), remap = false
+            )
     )
     private static BlockPos redirect_baseTick_new_0(double x, double y, double z, LivingEntity entity) {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection(entity);
