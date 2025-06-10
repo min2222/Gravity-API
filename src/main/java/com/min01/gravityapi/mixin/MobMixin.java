@@ -18,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
 
@@ -33,10 +34,10 @@ public abstract class MobMixin {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection(mob);
     	if(gravityDirection != Direction.DOWN)
     	{
-    		if(!(this.navigation instanceof GravityPathNavigation))
-    		{
+			if(this.navigation instanceof GroundPathNavigation)
+			{
     			this.navigation = new GravityPathNavigation(mob, mob.level);
-    		}
+			}
     	}
     	else if(this.navigation instanceof GravityPathNavigation)
     	{

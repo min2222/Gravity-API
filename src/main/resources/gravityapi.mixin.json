@@ -55,7 +55,8 @@
 		"fall_distance.ServerPlayerMixin_FallDistance",
 		"fall_distance.ServerGamePacketListenerImplMixin",
 		"item.BehaviorUtilsMixin",
-		"forge.MixinForgeHooks"
+		"forge.MixinForgeHooks",
+		"MixinServerLevel"
 	],
 	"client": [
 		"client.CameraMixin",

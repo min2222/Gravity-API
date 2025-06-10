@@ -1,6 +1,8 @@
 package com.min01.gravityapi.util;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -19,6 +21,9 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public class GCUtil {
+	
+	public static final Map<Integer, Entity> ENTITY_MAP = new HashMap<>();
+	public static final Map<Integer, Entity> ENTITY_MAP2 = new HashMap<>();
 	
 	public static void getClientLevel(Consumer<Level> consumer)
 	{
