@@ -97,7 +97,7 @@ public abstract class CameraMixin {
             target = "Lorg/joml/Quaternionf;rotationYXZ(FFF)Lorg/joml/Quaternionf;",
             shift = At.Shift.AFTER,
             remap = false
-        ), cancellable = true
+        )
     )
     private void inject_setRotation(CallbackInfo ci) {
         if (this.entity != null) {
