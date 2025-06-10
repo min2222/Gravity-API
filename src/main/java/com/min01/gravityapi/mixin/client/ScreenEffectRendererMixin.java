@@ -23,7 +23,7 @@ public abstract class ScreenEffectRendererMixin {
     @Inject(
         method = "getOverlayBlock",
         at = @At("HEAD"),
-        cancellable = true
+        cancellable = true, remap = false
     )
     private static void inject_getInWallBlockState(Player player, CallbackInfoReturnable<Pair<BlockState, BlockPos>> cir) {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection(player);
