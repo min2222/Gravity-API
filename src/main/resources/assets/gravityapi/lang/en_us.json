@@ -74,6 +74,7 @@
   "effect.gravityapi.west": "West Gravity",
   "effect.gravityapi.east": "East Gravity",
   "effect.gravityapi.invert": "Invert Gravity",
+  "effect.gravityapi.reverse": "Reverse Gravity",
 
   "block.gravityapi.plating": "Gravity Plating",
   "block.gravityapi.plating_dense": "Dense Gravity Plating",

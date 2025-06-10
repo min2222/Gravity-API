@@ -43,7 +43,6 @@ import net.minecraft.world.phys.Vec3;
  * Based on code from AmethystGravity (by CyborgCabbage)
  */
 public class GravityPlatingBlockEntity extends BlockEntity {
-    private static final Logger LOGGER = LogUtils.getLogger();
     
     private static final int MAX_LEVEL = 64;
     
@@ -189,7 +188,7 @@ public class GravityPlatingBlockEntity extends BlockEntity {
         Level world = getLevel();
         
         if (world == null) {
-            LOGGER.error("Refreshing cache when world is null {}", this);
+            //LOGGER.error("Refreshing cache when world is null {}", this);
             return;
         }
         
@@ -362,7 +361,7 @@ public class GravityPlatingBlockEntity extends BlockEntity {
                     );
                     
                     if (entity.level().isClientSide()) {
-                        LOGGER.info("Client entity auto-jump on gravity plate corner {}", entity);
+                        //LOGGER.info("Client entity auto-jump on gravity plate corner {}", entity);
                     }
                     return;
                 }
