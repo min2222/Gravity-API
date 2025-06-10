@@ -34,7 +34,7 @@ public class GravityConfig
     	GravityConfig.rotationTime = config.comment("animation rotation time").defineInRange("rotationTime", 500, 0, Integer.MAX_VALUE);
     	GravityConfig.gravityStrengthMultiplier = config.comment("gravity strength multiplier").defineInRange("gravityStrengthMultiplier", 1.0F, 0.0F, Float.MAX_VALUE);
     	GravityConfig.worldVelocity = config.comment("world velocity").define("worldVelocity", false);
-    	GravityConfig.resetGravityOnRespawn = config.comment("wether reset gravity on respawn").define("resetGravityOnRespawn", true);
+    	GravityConfig.resetGravityOnRespawn = config.comment("reset gravity on respawn").define("resetGravityOnRespawn", true);
     	GravityConfig.voidDamageAboveWorld = config.comment("void damage when above world").define("voidDamageAboveWorld", true);
     	GravityConfig.voidDamageOnHorizontalFallTooFar = config.comment("void damage when horizontally fall too far").define("voidDamageOnHorizontalFallTooFar", true);
     	GravityConfig.autoJumpOnGravityPlateInnerCorner = config.comment("auto jump on gravity plate inner corner").define("autoJumpOnGravityPlateInnerCorner", true);
