@@ -34,9 +34,12 @@ public abstract class MobMixin {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection(mob);
     	if(gravityDirection != Direction.DOWN)
     	{
-			if(this.navigation instanceof GroundPathNavigation)
+			if(!(this.navigation instanceof GravityPathNavigation))
 			{
-    			this.navigation = new GravityPathNavigation(mob, mob.level);
+				if(this.navigation instanceof GroundPathNavigation)
+				{
+	    			this.navigation = new GravityPathNavigation(mob, mob.level);
+				}
 			}
     	}
     	else if(this.navigation instanceof GravityPathNavigation)

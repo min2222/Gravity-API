@@ -65,6 +65,21 @@ public abstract class RotationUtil {
         return vecWorldToPlayer(vec3d.x, vec3d.y, vec3d.z, gravityDirection);
     }
     
+    public static Vec3 vecEntityToWorld(double x, double y, double z, Direction gravityDirection) {
+        return switch (gravityDirection) {
+            case DOWN -> new Vec3(x, y, z);
+            case UP -> new Vec3(x, -y, z);
+            case NORTH -> new Vec3(x, -z, y);
+            case SOUTH -> new Vec3(-x, -z, -y);
+            case WEST -> new Vec3(y, -z, -x);
+            case EAST -> new Vec3(-y, -z, x);
+        };
+    }
+    
+    public static Vec3 vecEntityToWorld(Vec3 vec3d, Direction gravityDirection) {
+        return vecEntityToWorld(vec3d.x, vec3d.y, vec3d.z, gravityDirection);
+    }
+    
     public static Vec3 vecPlayerToWorld(double x, double y, double z, Direction gravityDirection) {
         return switch (gravityDirection) {
             case DOWN -> new Vec3(x, y, z);

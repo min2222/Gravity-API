@@ -32,6 +32,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -182,6 +183,10 @@ public abstract class EntityMixin {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection((Entity) (Object) this);
         if (gravityDirection == Direction.DOWN) return;
         
+        if(!((Entity) (Object) this instanceof Player)) {
+        	cir.setReturnValue(RotationUtil.vecEntityToWorld(cir.getReturnValue(), gravityDirection));
+        }
+        
         cir.setReturnValue(RotationUtil.vecPlayerToWorld(cir.getReturnValue(), gravityDirection));
     }
     
@@ -249,6 +254,10 @@ public abstract class EntityMixin {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection((Entity) (Object) this);
         if (gravityDirection == Direction.DOWN) {
             return vec3d;
+        }
+        
+        if(!((Entity) (Object) this instanceof Player)) {
+        	return RotationUtil.vecEntityToWorld(vec3d, gravityDirection);
         }
         
         return RotationUtil.vecPlayerToWorld(vec3d, gravityDirection);
