@@ -136,6 +136,7 @@ public class GravityCapabilityImpl implements IGravityCapability {
             prevGravityDirection = currGravityDirection;
             prevGravityStrength = currGravityStrength;
             initialized = true;
+            this.needsSync = true;
             applyGravityDirectionChange(
                 prevGravityDirection, currGravityDirection, currentRotationParameters, true
             );
