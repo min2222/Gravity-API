@@ -5,17 +5,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.min01.gravityapi.api.GravityChangerAPI;
 import com.min01.gravityapi.util.RotationUtil;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -66,19 +66,17 @@ public abstract class PlayerMixin extends LivingEntity {
     }
     
     
-    @ModifyArgs(
+    @WrapOperation(
         method = "travel",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/core/BlockPos;containing(DDD)Lnet/minecraft/core/BlockPos;"
         )
     )
-    private void modify_move_multiply_0(Args args) {
+    private BlockPos modify_move_multiply_0(double x, double y, double z, Operation<BlockPos> original) {
         Vec3 rotate = new Vec3(0.0D, 1.0D - 0.1D, 0.0D);
         rotate = RotationUtil.vecPlayerToWorld(rotate, GravityChangerAPI.getGravityDirection(this));
-        args.set(0, (double) args.get(0) - rotate.x);
-        args.set(1, (double) args.get(1) - rotate.y + (1.0D - 0.1D));
-        args.set(2, (double) args.get(2) - rotate.z);
+        return original.call((double) x - rotate.x, (double) y - rotate.y + (1.0D - 0.1D), (double) z - rotate.z);
     }
     //@Redirect(
     //        method = "travel",
@@ -304,37 +302,37 @@ public abstract class PlayerMixin extends LivingEntity {
         return RotationUtil.rotPlayerToWorld(original.call(attacker), attacker.getXRot(), gravityDirection).x;
     }
     
-    @ModifyArgs(
+    @WrapOperation(
         method = "addParticlesAroundSelf",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"
         )
     )
-    private void modify_addDeathParticless_addParticle_0(Args args) {
+    private void modify_addDeathParticless_addParticle_0(Level instance, ParticleOptions particle, double x, double y, double z, double dx, double dy, double dz, Operation<Void> original) {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection((Entity) (Object) this);
-        if (gravityDirection == Direction.DOWN) return;
-        
-        Vec3 vec3d = this.position().subtract(RotationUtil.vecPlayerToWorld(this.position().subtract(args.get(1), args.get(2), args.get(3)), gravityDirection));
-        args.set(1, vec3d.x);
-        args.set(2, vec3d.y);
-        args.set(3, vec3d.z);
+
+        if (gravityDirection == Direction.DOWN) {
+            original.call(instance, particle, x, y, z, dx, dy, dz);
+        }
+        else {
+            Vec3 vec3d = this.position().subtract(RotationUtil.vecPlayerToWorld(this.position().subtract(x, y, z), gravityDirection));
+            original.call(instance, particle, vec3d.x, vec3d.y, vec3d.z, dx, dy, dz);
+        }
     }
     
-    @ModifyArgs(
+    @WrapOperation(
         method = "aiStep",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/phys/AABB;inflate(DDD)Lnet/minecraft/world/phys/AABB;"
         )
     )
-    private void modify_tickMovement_expand_0(Args args) {
+    private AABB modify_tickMovement_expand_0(AABB instance, double x, double y, double z, Operation<AABB> original) {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection((Entity) (Object) this);
-        if (gravityDirection == Direction.DOWN) return;
+        if (gravityDirection == Direction.DOWN) return original.call(instance, x, y, z);
         
-        Vec3 vec3d = RotationUtil.maskPlayerToWorld(args.get(0), args.get(1), args.get(2), gravityDirection);
-        args.set(0, vec3d.x);
-        args.set(1, vec3d.y);
-        args.set(2, vec3d.z);
+        Vec3 vec3d = RotationUtil.maskPlayerToWorld(x, y, z, gravityDirection);
+        return original.call(instance, vec3d.x, vec3d.y, vec3d.z);
     }
 }

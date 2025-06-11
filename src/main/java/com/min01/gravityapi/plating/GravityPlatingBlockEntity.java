@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import com.min01.gravityapi.EntityTags;
 import com.min01.gravityapi.api.GravityChangerAPI;
@@ -14,7 +13,6 @@ import com.min01.gravityapi.config.GravityConfig;
 import com.min01.gravityapi.init.GravityBlocks;
 import com.min01.gravityapi.util.GCUtil;
 import com.min01.gravityapi.util.RotationUtil;
-import com.mojang.logging.LogUtils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

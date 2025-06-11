@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.min01.gravityapi.api.GravityChangerAPI;
 import com.min01.gravityapi.util.RotationUtil;
 
@@ -191,14 +191,14 @@ public abstract class AreaEffectCloudMixin extends Entity {
     //  }
     
     
-    @ModifyArgs(
+    @WrapOperation(
         method = "tick",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;addAlwaysVisibleParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"
         )
     )
-    private void modify_move_multiply_0(Args args) {
+    private void modify_move_multiply_0(Level instance, ParticleOptions particle, double x, double y, double z, double dx, double dy, double dz, Operation<Void> original) {
         boolean bl = this.isWaiting();
         float f = this.getRadius();
         
@@ -221,10 +221,8 @@ public abstract class AreaEffectCloudMixin extends Entity {
         e = modify.y;
         l = modify.z + (double) (Mth.sin(h) * k);
         modify = RotationUtil.vecPlayerToWorld(d, e, l, GravityChangerAPI.getGravityDirection(this));
-        
-        args.set(1, modify.x);
-        args.set(2, modify.y);
-        args.set(3, modify.z);
+
+        original.call(instance, particle, modify.x, modify.y, modify.z, dx, dy, dz);
     }
     
     
