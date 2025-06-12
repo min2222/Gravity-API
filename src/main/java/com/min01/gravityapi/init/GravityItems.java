@@ -4,7 +4,6 @@ import com.min01.gravityapi.GravityAPI;
 import com.min01.gravityapi.item.GravityAnchorItem;
 import com.min01.gravityapi.item.GravityChangerItem;
 import com.min01.gravityapi.item.GravityChangerItemAOE;
-import com.min01.gravityapi.plating.GravityPlatingItem;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
@@ -24,8 +23,6 @@ public class GravityItems
     public static final RegistryObject<Item> GRAVITY_CHANGER_WEST = ITEMS.register("gravity_changer_west", () -> new GravityChangerItem(new Properties().stacksTo(1), Direction.WEST));
     public static final RegistryObject<Item> GRAVITY_CHANGER_EAST = ITEMS.register("gravity_changer_east", () -> new GravityChangerItem(new Properties().stacksTo(1), Direction.EAST));
     
-    public static final RegistryObject<Item> GRAVITY_PLATING = ITEMS.register("plating", () -> new GravityPlatingItem(GravityBlocks.GRAVITY_PLATING.get(), new Properties()));
-	
     public static final RegistryObject<Item> GRAVITY_CHANGER_DOWN_AOE = ITEMS.register("gravity_changer_down_aoe", () -> new GravityChangerItemAOE(new Properties().stacksTo(1), Direction.DOWN));
     public static final RegistryObject<Item> GRAVITY_CHANGER_UP_AOE = ITEMS.register("gravity_changer_up_aoe", () -> new GravityChangerItemAOE(new Properties().stacksTo(1), Direction.UP));
     public static final RegistryObject<Item> GRAVITY_CHANGER_NORTH_AOE = ITEMS.register("gravity_changer_north_aoe", () -> new GravityChangerItemAOE(new Properties().stacksTo(1), Direction.NORTH));
