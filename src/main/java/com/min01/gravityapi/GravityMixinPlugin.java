@@ -7,7 +7,10 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
+import com.bawnorton.mixinsquared.MixinSquaredBootstrap;
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
+
+import net.minecraftforge.fml.loading.LoadingModList;
 
 public class GravityMixinPlugin implements IMixinConfigPlugin
 {
@@ -15,6 +18,7 @@ public class GravityMixinPlugin implements IMixinConfigPlugin
     public void onLoad(String mixinPackage)
     {
         MixinExtrasBootstrap.init();
+        MixinSquaredBootstrap.init();
     }
 
 	@Override
@@ -26,6 +30,10 @@ public class GravityMixinPlugin implements IMixinConfigPlugin
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) 
 	{
+		if(mixinClassName.equals("com.min01.gravityapi.mixin.compat.ACEntityMixin") && LoadingModList.get().getModFileById("alexscaves") == null)
+		{
+			return false;
+		}
 		return true;
 	}
 

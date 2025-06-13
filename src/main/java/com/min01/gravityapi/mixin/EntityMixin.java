@@ -332,8 +332,7 @@ public abstract class EntityMixin {
         BlockPos blockPos = BlockPos.containing(RotationUtil.vecPlayerToWorld(0.0D, -0.20000000298023224D, 0.0D, gravityDirection).add(this.position));
         cir.setReturnValue(blockPos);
     }
-    
-    //https://github.com/Tfarcenim/GravityChanger/issues/2
+
     // transform the argument to local coordinate
     @ModifyVariable(
         method = "collide",
@@ -352,7 +351,7 @@ public abstract class EntityMixin {
         
         return RotationUtil.vecWorldToPlayer(vec3d, gravityDirection);
     }
-    
+
     // transform the result to world coordinate
     // the input to Entity.collideBoundingBox will be in local coord
     @Inject(
