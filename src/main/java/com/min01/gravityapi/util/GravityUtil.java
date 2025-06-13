@@ -31,6 +31,24 @@ public class GravityUtil
 	public static final Map<Integer, Entity> ENTITY_MAP = new HashMap<>();
 	public static final Map<Integer, Entity> ENTITY_MAP2 = new HashMap<>();
 	
+	public static double getPlayerX(Entity entity)
+	{
+		Vec3 vec3 = vecWorldToPlayer(entity.position(), getGravityDirection(entity));
+		return vec3.x;
+	}
+	
+	public static double getPlayerY(Entity entity)
+	{
+		Vec3 vec3 = vecWorldToPlayer(entity.position(), getGravityDirection(entity));
+		return vec3.y;
+	}
+	
+	public static double getPlayerZ(Entity entity)
+	{
+		Vec3 vec3 = vecWorldToPlayer(entity.position(), getGravityDirection(entity));
+		return vec3.z;
+	}
+	
 	public static void getClientLevel(Consumer<Level> consumer)
 	{
 		LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT).filter(ClientLevel.class::isInstance).ifPresent(level -> 
