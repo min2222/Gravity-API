@@ -7,7 +7,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.min01.gravityapi.util.GravityUtil;
+import com.min01.gravityapi.api.GravityChangerAPI;
+import com.min01.gravityapi.util.GCUtil;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -35,28 +36,22 @@ public abstract class MixinServerLevel extends Level
 		Class<?>[] ctx = manager.getContext();
 		for(Class<?> clazz : ctx)
 		{
-			if(GravityUtil.ENTITY_MAP.containsKey(clazz.hashCode()))
+			if(GCUtil.ENTITY_MAP.containsKey(clazz.hashCode()))
 			{
-				Entity entity = GravityUtil.ENTITY_MAP.get(clazz.hashCode());
+				Entity entity = GCUtil.ENTITY_MAP.get(clazz.hashCode());
 				if(entity != null)
 				{
-					if(GravityUtil.hasGravity(entity))
-					{
-						Direction direction = GravityUtil.getGravityDirection(entity);
-						GravityUtil.setGravityDirection(p_8837_, direction);
-					}
+			        Direction gravityDirection = GravityChangerAPI.getGravityDirection(entity);
+			        GravityChangerAPI.setBaseGravityDirection(p_8837_, gravityDirection);
 				}
 			}
-			else if(GravityUtil.ENTITY_MAP2.containsKey(clazz.hashCode()))
+			else if(GCUtil.ENTITY_MAP2.containsKey(clazz.hashCode()))
 			{
-				Entity entity = GravityUtil.ENTITY_MAP2.get(clazz.hashCode());
+				Entity entity = GCUtil.ENTITY_MAP2.get(clazz.hashCode());
 				if(entity != null)
 				{
-					if(GravityUtil.hasGravity(entity))
-					{
-						Direction direction = GravityUtil.getGravityDirection(entity);
-						GravityUtil.setGravityDirection(p_8837_, direction);
-					}
+			        Direction gravityDirection = GravityChangerAPI.getGravityDirection(entity);
+			        GravityChangerAPI.setBaseGravityDirection(p_8837_, gravityDirection);
 				}
 			}
 		}

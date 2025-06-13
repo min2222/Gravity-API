@@ -1,6 +1,8 @@
 package com.min01.gravityapi.init;
 
 import com.min01.gravityapi.GravityAPI;
+import com.min01.gravityapi.plating.GravityPlatingBlockEntity;
+import com.min01.gravityapi.plating.GravityPlatingItem;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -31,6 +33,28 @@ public class GravityCreativeTabs
                 output.accept(new ItemStack(GravityItems.GRAVITY_CHANGER_WEST_AOE.get()));
                 output.accept(new ItemStack(GravityItems.GRAVITY_CHANGER_NORTH_AOE.get()));
                 output.accept(new ItemStack(GravityItems.GRAVITY_CHANGER_SOUTH_AOE.get()));
+                
+                output.accept(GravityPlatingItem.createStack(
+                    new GravityPlatingBlockEntity.SideData(true, 1)
+                ));
+                output.accept(GravityPlatingItem.createStack(
+                    new GravityPlatingBlockEntity.SideData(true, 2)
+                ));
+                output.accept(GravityPlatingItem.createStack(
+                    new GravityPlatingBlockEntity.SideData(true, 8)
+                ));
+                output.accept(GravityPlatingItem.createStack(
+                    new GravityPlatingBlockEntity.SideData(true, 32)
+                ));
+                output.accept(GravityPlatingItem.createStack(
+                    new GravityPlatingBlockEntity.SideData(true, 64)
+                ));
+                output.accept(GravityPlatingItem.createStack(
+                    new GravityPlatingBlockEntity.SideData(false, 8)
+                ));
+                output.accept(GravityPlatingItem.createStack(
+                    new GravityPlatingBlockEntity.SideData(false, 32)
+                ));
                 
                 output.accept(new ItemStack(GravityItems.GRAVITY_ANCHOR_UP.get()));
                 output.accept(new ItemStack(GravityItems.GRAVITY_ANCHOR_DOWN.get()));
