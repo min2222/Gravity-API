@@ -33,6 +33,53 @@ mixin {
     config "gravityapi.mixin.json"
 }
 
+sourceSets {
+    asm {
+        java {
+            srcDirs = ['src/asm']
+        }
+        resources {
+            srcDirs = ['src/asm/resources']
+        }
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('allJar', Jar) {
+    archiveBaseName.set("${mod_id}-all")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE  // <--- add this line
+    from(sourceSets.main.output)
+	from({
+	    zipTree(tasks.jarJar.archiveFile)
+	})
+}
+
+def allJarProvider = tasks.named('allJar', Jar)
+
+tasks.register('asmJar', Jar) {
+    archiveBaseName.set("${mod_id}-asm")
+
+    from(sourceSets.asm.output)
+
+    from(allJarProvider.flatMap { it.archiveFile }) {
+        into('')
+        rename { "gravityapi-forge.jar" }
+    }
+
+    manifest {
+        attributes(
+            'Specification-Title'    : mod_id,
+            'Specification-Version'  : project.version,
+            'Implementation-Vendor'  : mod_authors
+        )
+    }
+}
+
+tasks.asmJar {
+    dependsOn(tasks.allJar, tasks.compileAsmJava)
+}
+
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
