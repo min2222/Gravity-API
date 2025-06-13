@@ -1,7 +1,18 @@
 package com.min01.gravityapi.asm;
 
+import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.spi.FileSystemProvider;
+import java.security.CodeSource;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.ClassNode;
@@ -47,13 +58,13 @@ public class GravityTransformationService implements ITransformationService, ITr
 	@Override
 	public void initialize(IEnvironment environment) 
 	{
-		
 	}
 
 	@Override
 	public void onLoad(IEnvironment env, Set<String> otherServices) throws IncompatibleEnvironmentException 
 	{
 		LOGGER.info("GravityAPI Load");
+		this.extractModFile();
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -61,5 +72,44 @@ public class GravityTransformationService implements ITransformationService, ITr
 	public @NotNull List<ITransformer> transformers() 
 	{
 		return List.of(this);
+	}
+	
+	public void extractModFile()
+	{
+        try 
+        {
+            CodeSource src = GravityTransformationService.class.getProtectionDomain().getCodeSource();
+            URL jar = src.getLocation();
+            for(FileSystemProvider provider : FileSystemProvider.installedProviders()) 
+            {
+                if(provider.getScheme().equalsIgnoreCase("union")) 
+                {
+                    try 
+                    {
+                        provider.getFileSystem(jar.toURI());
+                    } 
+                    catch(FileSystemNotFoundException e) 
+                    {
+                        provider.newFileSystem(jar.toURI(), Collections.emptyMap());
+                    }
+                }
+            }
+            Path myPath = Paths.get(jar.toURI());
+            Stream<Path> walk = Files.walk(myPath, 1, new FileVisitOption[0]).peek(p -> 
+            {
+            }).filter(p2 ->
+            {
+                return p2.toString().endsWith(".jar");
+            });
+            Path root = Paths.get("mods", new String[0]);
+            for(Path file : walk.toList()) 
+            {
+                Files.copy(file, root.resolve(file.getFileName().toString()), StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+        catch(Exception e2)
+        {
+            e2.printStackTrace();
+        }
 	}
 }
