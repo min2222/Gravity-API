@@ -22,6 +22,7 @@ public class GravityTransformationService implements ITransformationService, ITr
 	@Override
 	public @NotNull ClassNode transform(ClassNode input, ITransformerVotingContext context)
 	{
+		LOGGER.info("GravityAPI " + input.name);
 		return input;
 	}
 
@@ -34,7 +35,7 @@ public class GravityTransformationService implements ITransformationService, ITr
 	@Override
 	public @NotNull Set<Target> targets()
 	{
-		return Set.of();
+		return Set.of(Target.targetClass("net.minecraft.world.Entity"));
 	}
 
 	@Override
