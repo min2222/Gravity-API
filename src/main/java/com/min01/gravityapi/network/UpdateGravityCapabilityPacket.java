@@ -4,7 +4,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.min01.gravityapi.capabilities.GravityCapabilities;
-import com.min01.gravityapi.util.GCUtil;
+import com.min01.gravityapi.util.GravityUtil;
 
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,36 +14,24 @@ import net.minecraftforge.network.NetworkEvent;
 public class UpdateGravityCapabilityPacket 
 {
 	private final UUID entityUUID;
-	private final Direction baseGravityDirection;
-	private final Direction currentGravityDirection;
-	private final double baseGravityStrength;
-	private final double currentGravityStrength;
+	private final Direction direction;
 	
-	public UpdateGravityCapabilityPacket(UUID entityUUID, Direction baseGravityDirection, Direction currentGravityDirection, double baseGravityStrength, double currentGravityStrength) 
+	public UpdateGravityCapabilityPacket(UUID entityUUID, Direction direction) 
 	{
 		this.entityUUID = entityUUID;
-		this.baseGravityDirection = baseGravityDirection;
-		this.currentGravityDirection = currentGravityDirection;
-		this.baseGravityStrength = baseGravityStrength;
-		this.currentGravityStrength = currentGravityStrength;
+		this.direction = direction;
 	}
 
 	public UpdateGravityCapabilityPacket(FriendlyByteBuf buf)
 	{
 		this.entityUUID = buf.readUUID();
-		this.baseGravityDirection = buf.readEnum(Direction.class);
-		this.currentGravityDirection = buf.readEnum(Direction.class);
-		this.baseGravityStrength = buf.readDouble();
-		this.currentGravityStrength = buf.readDouble();
+		this.direction = buf.readEnum(Direction.class);
 	}
 
 	public void encode(FriendlyByteBuf buf)
 	{
 		buf.writeUUID(this.entityUUID);
-		buf.writeEnum(this.baseGravityDirection);
-		buf.writeEnum(this.currentGravityDirection);
-		buf.writeDouble(this.baseGravityStrength);
-		buf.writeDouble(this.currentGravityStrength);
+		buf.writeEnum(this.direction);
 	}
 	
 	public static class Handler 
@@ -54,13 +42,12 @@ public class UpdateGravityCapabilityPacket
 			{
 				if(ctx.get().getDirection().getReceptionSide().isClient())
 				{
-					GCUtil.getClientLevel(level -> 
+					GravityUtil.getClientLevel(level -> 
 					{
-						Entity entity = GCUtil.getEntityByUUID(level, message.entityUUID);
+						Entity entity = GravityUtil.getEntityByUUID(level, message.entityUUID);
 						entity.getCapability(GravityCapabilities.GRAVITY).ifPresent(cap -> 
 						{
-							cap.sync(message.baseGravityDirection, message.currentGravityDirection, message.baseGravityStrength, message.currentGravityStrength);
-							cap.applyGravityChange();
+							cap.setGravityDirection(message.direction);
 						});
 					});
 				}
