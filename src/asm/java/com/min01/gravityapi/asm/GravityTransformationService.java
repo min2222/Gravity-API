@@ -46,7 +46,7 @@ public class GravityTransformationService implements ITransformationService, ITr
 	@Override
 	public @NotNull Set<Target> targets()
 	{
-		return Set.of(Target.targetClass("net.minecraft.world.Entity"));
+		return Set.of(Target.targetClass("net.minecraft.world.entity.Entity"));
 	}
 
 	@Override
@@ -58,6 +58,7 @@ public class GravityTransformationService implements ITransformationService, ITr
 	@Override
 	public void initialize(IEnvironment environment) 
 	{
+		
 	}
 
 	@Override
