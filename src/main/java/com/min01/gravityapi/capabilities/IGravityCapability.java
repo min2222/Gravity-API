@@ -16,7 +16,9 @@ public interface IGravityCapability extends INBTSerializable<CompoundTag>
 
 	void setEntity(Entity entity);
 	
-	void setGravityDirection(Direction direction);
+	void tick();
 	
-	Direction getGravityDirection();
+	void applyGravityChange();
+	
+	void sync(Direction baseGravityDirection, Direction currentGravityDirection, double baseGravityStrength, double currentGravityStrength);
 }
