@@ -18,7 +18,7 @@ function initializeCoreMod() {
                 for (var i = 0; i < methods.size(); i++) {
                     var method = methods.get(i);
 
-                    if (method.name.equals("tick")) {
+                    if (method.name.equals(asmapi.mapMethod("m_8119_"))) {
                         var instructions = method.instructions;
                         var insn = instructions.getFirst();
 

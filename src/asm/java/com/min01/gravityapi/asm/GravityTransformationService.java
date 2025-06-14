@@ -15,7 +15,13 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,16 +31,108 @@ import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.IncompatibleEnvironmentException;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
+import net.minecraftforge.coremod.api.ASMAPI;
 
 public class GravityTransformationService implements ITransformationService, ITransformer<ClassNode>
 {
 	public static final Logger LOGGER = LoggerFactory.getLogger("GravityAPI");
 	
 	@Override
-	public @NotNull ClassNode transform(ClassNode input, ITransformerVotingContext context)
-	{
-		LOGGER.info("GravityAPI " + input.name);
-		return input;
+	public @NotNull ClassNode transform(ClassNode classNode, ITransformerVotingContext context) {
+	    if (!"net/minecraft/world/entity/AreaEffectCloud".equals(classNode.name)) {
+	        return classNode;
+	    }
+
+	    LOGGER.info("Applying gravity transformation to AreaEffectCloud.tick()");
+	    
+	    for (var method : classNode.methods) {
+	        if (ASMAPI.mapMethod("m_8119_").equals(method.name) && "()V".equals(method.desc)) {
+	            var instructions = method.instructions;
+
+	            // Replace getX/Y/Z() with GravityUtil.getPlayerX/Y/Z(this)
+	            for (var insn = instructions.getFirst(); insn != null; insn = insn.getNext()) {
+	                if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL &&
+	                    insn instanceof MethodInsnNode call &&
+	                    "net/minecraft/world/entity/AreaEffectCloud".equals(call.owner) &&
+	                    call.desc.equals("()D") &&
+	                    (call.name.equals("getX") || call.name.equals("getY") || call.name.equals("getZ"))) {
+
+	                    var aload0 = call.getPrevious();
+	                    if (!(aload0 instanceof VarInsnNode aloadNode && aloadNode.getOpcode() == Opcodes.ALOAD && aloadNode.var == 0)) {
+	                        continue;
+	                    }
+
+	                    var replacementMethod = "getPlayer" + Character.toUpperCase(call.name.charAt(call.name.length() - 1));
+
+	                    var newInsnList = new InsnList();
+	                    newInsnList.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this
+	                    newInsnList.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+	                        "com/min01/gravityapi/util/GravityUtil",
+	                        replacementMethod,
+	                        "(Lnet/minecraft/world/entity/Entity;)D",
+	                        false));
+
+	                    instructions.insertBefore(aload0, newInsnList);
+	                    instructions.remove(aload0);
+	                    instructions.remove(call);
+	                }
+	            }
+
+	            // Inject vecPlayerToWorld after DSTORE 13 (z)
+	            AbstractInsnNode insertAfter = null;
+	            for (int i = 0; i < instructions.size(); i++) {
+	                AbstractInsnNode node = instructions.get(i);
+	                if (node.getOpcode() == Opcodes.DSTORE && node instanceof VarInsnNode store && store.var == 13) {
+	                    insertAfter = store;
+	                }
+	            }
+
+	            if (insertAfter != null) {
+	                int vec3Index = method.maxLocals;
+	                method.maxLocals += 1;
+
+	                var inject = new InsnList();
+	                inject.add(new VarInsnNode(Opcodes.DLOAD, 9));   // x
+	                inject.add(new VarInsnNode(Opcodes.DLOAD, 11));  // y
+	                inject.add(new VarInsnNode(Opcodes.DLOAD, 13));  // z
+	                inject.add(new VarInsnNode(Opcodes.ALOAD, 0));   // this
+
+	                inject.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+	                    "com/min01/gravityapi/util/GravityUtil",
+	                    "getGravityDirection",
+	                    "(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/core/Direction;",
+	                    false));
+
+	                inject.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+	                    "com/min01/gravityapi/util/GravityUtil",
+	                    "vecPlayerToWorld",
+	                    "(DDDLnet/minecraft/core/Direction;)Lnet/minecraft/world/phys/Vec3;",
+	                    false));
+	                inject.add(new VarInsnNode(Opcodes.ASTORE, vec3Index));
+
+	                // Unpack Vec3 into x/y/z
+	                inject.add(new VarInsnNode(Opcodes.ALOAD, vec3Index));
+	                inject.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/world/phys/Vec3", "x", "D"));
+	                inject.add(new VarInsnNode(Opcodes.DSTORE, 9));
+
+	                inject.add(new VarInsnNode(Opcodes.ALOAD, vec3Index));
+	                inject.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/world/phys/Vec3", "y", "D"));
+	                inject.add(new VarInsnNode(Opcodes.DSTORE, 11));
+
+	                inject.add(new VarInsnNode(Opcodes.ALOAD, vec3Index));
+	                inject.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/world/phys/Vec3", "z", "D"));
+	                inject.add(new VarInsnNode(Opcodes.DSTORE, 13));
+
+	                instructions.insert(insertAfter, inject);
+
+	                LOGGER.info("Gravity transform injected into AreaEffectCloud.tick()");
+	            } else {
+	                LOGGER.warn("Could not find DSTORE 13 in AreaEffectCloud.tick(), skipping injection");
+	            }
+	        }
+	    }
+
+	    return classNode;
 	}
 
 	@Override
@@ -46,7 +144,7 @@ public class GravityTransformationService implements ITransformationService, ITr
 	@Override
 	public @NotNull Set<Target> targets()
 	{
-		return Set.of(Target.targetClass("net.minecraft.world.entity.Entity"));
+	    return Set.of(Target.targetClass("net.minecraft.world.entity.AreaEffectCloud"));
 	}
 
 	@Override

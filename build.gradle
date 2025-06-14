@@ -57,12 +57,18 @@ tasks.register('allJar', Jar) {
 
 def allJarProvider = tasks.named('allJar', Jar)
 
+tasks.named('allJar', Jar).configure {
+	finalizedBy 'reobfAllJar'
+}
+
 tasks.register('asmJar', Jar) {
     archiveBaseName.set("${mod_id}-asm")
 
     from(sourceSets.asm.output)
 
-    from(allJarProvider.flatMap { it.archiveFile }) {
+    from({ 
+        file("build/reobfAllJar/output.jar")
+    }) {
         into('')
         rename { "gravityapi-forge.jar" }
     }
@@ -78,6 +84,11 @@ tasks.register('asmJar', Jar) {
 
 tasks.asmJar {
     dependsOn(tasks.allJar, tasks.compileAsmJava)
+}
+
+reobf {
+    allJar {}
+    asmJar {}
 }
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
