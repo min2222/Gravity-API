@@ -23,8 +23,8 @@ public class GravityBlockPos extends BlockPos
 	        {
 	            case UP -> super.relative(Direction.DOWN, p_121949_);
 	            case DOWN -> super.relative(Direction.UP, p_121949_);
-	            case WEST -> super.relative(Direction.EAST, p_121949_);
-	            case EAST -> super.relative(Direction.WEST, p_121949_);
+	            case WEST -> super.relative(Direction.WEST, p_121949_);
+	            case EAST -> super.relative(Direction.EAST, p_121949_);
 	            default -> super.relative(p_121946_, p_121949_);
 	        };
 	        case NORTH -> switch (p_121946_)
@@ -72,8 +72,8 @@ public class GravityBlockPos extends BlockPos
 	        {
 	            case UP -> super.relative(Direction.DOWN);
 	            case DOWN -> super.relative(Direction.UP);
-	            case WEST -> super.relative(Direction.EAST);
-	            case EAST -> super.relative(Direction.WEST);
+	            case WEST -> super.relative(Direction.WEST);
+	            case EAST -> super.relative(Direction.EAST);
 	            default -> super.relative(p_121946_);
 	        };
 	        case NORTH -> switch (p_121946_) 
