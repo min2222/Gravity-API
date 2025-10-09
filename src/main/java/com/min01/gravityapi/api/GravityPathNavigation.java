@@ -1,22 +1,16 @@
 package com.min01.gravityapi.api;
 
-import javax.annotation.Nullable;
-
-import com.google.common.collect.ImmutableSet;
-
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.DebugPackets;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.pathfinder.FlyNodeEvaluator;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.Vec3;
 
-//copy of FlyingPathNavigation;
 public class GravityPathNavigation extends GroundPathNavigation
 {
 	public GravityPathNavigation(Mob p_26424_, Level p_26425_) 
@@ -27,100 +21,81 @@ public class GravityPathNavigation extends GroundPathNavigation
 	@Override
 	protected PathFinder createPathFinder(int p_26428_) 
 	{
-		this.nodeEvaluator = new FlyNodeEvaluator();
+		this.nodeEvaluator = new GravityNodeEvaluator();
 		this.nodeEvaluator.setCanPassDoors(true);
 		return new PathFinder(this.nodeEvaluator, p_26428_);
 	}
-
+	
 	@Override
-	protected boolean canMoveDirectly(Vec3 p_262585_, Vec3 p_262682_)
+	protected Vec3 getTempMobPos() 
 	{
-		return isClearForMovementBetween(this.mob, p_262585_, p_262682_, true);
-	}
-
-	@Override
-	protected boolean canUpdatePath()
-	{
-		return true;
-	}
-
-	@Override
-	protected Vec3 getTempMobPos()
-	{
-		return this.mob.position();
+		return this.getSurfacePos();
 	}
 	
-	@Nullable
-	@Override
-	public Path createPath(BlockPos p_26546_, int p_26547_) 
+	private Vec3 getSurfacePos() 
 	{
-		return this.createPath(ImmutableSet.of(p_26546_), 8, false, p_26547_);
-	}
-
-	@Override
-	public Path createPath(Entity p_26430_, int p_26431_) 
-	{
-		return this.createPath(p_26430_.blockPosition(), p_26431_);
-	}
-
-	@Override
-	public void tick()
-	{
-		++this.tick;
-		if(this.hasDelayedRecomputation) 
+		if(this.mob.isInWater() && this.canFloat()) 
 		{
-			this.recomputePath();
-		}
-		if(!this.isDone())
-		{
-			if(this.canUpdatePath())
+			Direction direction = GravityChangerAPI.getGravityDirection(this.mob);
+			BlockPos pos = this.mob.blockPosition();
+			BlockState blockstate = this.level.getBlockState(pos);
+			int j = 0;
+			while(blockstate.is(Blocks.WATER)) 
 			{
-				this.followThePath();
-			} 
-			else if(this.path != null && !this.path.isDone())
-			{
-				Vec3 vec3 = this.path.getNextEntityPos(this.mob);
-				if(this.mob.getBlockX() == Mth.floor(vec3.x) && this.mob.getBlockY() == Mth.floor(vec3.y) && this.mob.getBlockZ() == Mth.floor(vec3.z))
+				pos = pos.relative(direction.getOpposite());
+				blockstate = this.level.getBlockState(pos);
+				++j;
+				if(j > 16)
 				{
-					this.path.advance();
+					return this.mob.position();
 				}
 			}
-			DebugPackets.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
-			if(!this.isDone())
-			{
-				Vec3 vec31 = this.path.getNextEntityPos(this.mob);
-				this.mob.getMoveControl().setWantedPosition(vec31.x, vec31.y, vec31.z, this.speedModifier);
-			}
+			return Vec3.atCenterOf(pos);
+		}
+		else 
+		{
+			return this.mob.position();
 		}
 	}
-
+	
+	@SuppressWarnings("deprecation")
 	@Override
-	public void setCanOpenDoors(boolean p_26441_) 
+	public Path createPath(BlockPos p_26475_, int p_26476_) 
 	{
-		this.nodeEvaluator.setCanOpenDoors(p_26441_);
-	}
-
-	@Override
-	public boolean canPassDoors() 
-	{
-		return this.nodeEvaluator.canPassDoors();
-	}
-
-	@Override
-	public void setCanPassDoors(boolean p_26444_)
-	{
-		this.nodeEvaluator.setCanPassDoors(p_26444_);
-	}
-
-	@Override
-	public boolean canOpenDoors() 
-	{
-		return this.nodeEvaluator.canPassDoors();
-	}
-
-	@Override
-	public boolean isStableDestination(BlockPos p_26439_)
-	{
-		return this.level.getBlockState(p_26439_).entityCanStandOn(this.level, p_26439_, this.mob);
+		Direction direction = GravityChangerAPI.getGravityDirection(this.mob);
+		if(this.level.getBlockState(p_26475_).isAir())
+		{
+			BlockPos blockpos;
+			int i = 0;
+			int i2 = 0;
+			for(blockpos = p_26475_.relative(direction); i < this.level.getMaxBuildHeight() && this.level.getBlockState(blockpos).isAir(); blockpos = blockpos.relative(direction))
+			{
+				i++;
+			}
+			if(i < this.level.getMaxBuildHeight())
+			{
+				return super.createPath(blockpos.relative(direction.getOpposite()), p_26476_);
+			}
+			while(i2 < this.level.getMaxBuildHeight() && this.level.getBlockState(blockpos).isAir())
+			{
+				i2++;
+				blockpos = blockpos.relative(direction.getOpposite());
+			}
+			p_26475_ = blockpos;
+		}
+		if(!this.level.getBlockState(p_26475_).isSolid())
+		{
+			return super.createPath(p_26475_, p_26476_);
+		} 
+		else 
+		{
+			BlockPos blockpos1;
+			int i = 0;
+			for(blockpos1 = p_26475_.relative(direction.getOpposite()); i < this.level.getMaxBuildHeight() && this.level.getBlockState(blockpos1).isSolid(); blockpos1 = blockpos1.relative(direction.getOpposite())) 
+			{
+				i++;
+			}
+			return super.createPath(blockpos1, p_26476_);
+		}
 	}
 }

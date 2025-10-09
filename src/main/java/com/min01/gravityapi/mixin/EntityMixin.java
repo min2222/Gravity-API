@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.min01.gravityapi.api.GravityBlockPos;
 import com.min01.gravityapi.api.GravityChangerAPI;
 import com.min01.gravityapi.capabilities.GravityCapabilities;
 import com.min01.gravityapi.capabilities.IGravityCapability;
@@ -150,15 +149,6 @@ public abstract class EntityMixin {
     		box = box.move(0.0D, -1.0E-6D, 0.0D);
     	}
     	return RotationUtil.boxPlayerToWorld(box, gravityDirection).move(pos);
-    }
-    
-    @Inject(method = "blockPosition", at = @At("RETURN"), cancellable = true)
-    private void blockPosition(CallbackInfoReturnable<BlockPos> cir)
-    {
-        Direction gravityDirection = GravityChangerAPI.getGravityDirection((Entity) (Object) this);
-        if (gravityDirection == Direction.DOWN) return;
-		GravityBlockPos pos = new GravityBlockPos(cir.getReturnValue(), gravityDirection);
-		cir.setReturnValue(pos);
     }
     
     @Inject(method = "getBoundingBoxForPose", at = @At("RETURN"), cancellable = true)
