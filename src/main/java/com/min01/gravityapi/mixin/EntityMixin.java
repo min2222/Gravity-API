@@ -173,10 +173,6 @@ public abstract class EntityMixin {
         Direction gravityDirection = GravityChangerAPI.getGravityDirection((Entity) (Object) this);
         if (gravityDirection == Direction.DOWN) return;
         
-        if(!((Entity) (Object) this instanceof Player)) {
-        	cir.setReturnValue(RotationUtil.vecEntityToWorld(cir.getReturnValue(), gravityDirection));
-        }
-        
         cir.setReturnValue(RotationUtil.vecPlayerToWorld(cir.getReturnValue(), gravityDirection));
     }
     

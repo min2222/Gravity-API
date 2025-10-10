@@ -20,5 +20,5 @@ public interface IGravityCapability extends INBTSerializable<CompoundTag>
 	
 	void applyGravityChange();
 	
-	void sync(Direction baseGravityDirection, Direction currentGravityDirection, double baseGravityStrength, double currentGravityStrength);
+	void sync(boolean noAnimation, Direction baseGravityDirection, Direction currentGravityDirection, double baseGravityStrength, double currentGravityStrength);
 }

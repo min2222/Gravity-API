@@ -16,6 +16,7 @@ import com.min01.gravityapi.mixin.EntityAccessor;
 import com.min01.gravityapi.mob_effect.GravityDirectionMobEffect;
 import com.min01.gravityapi.network.GravityNetwork;
 import com.min01.gravityapi.network.UpdateGravityCapabilityPacket;
+import com.min01.gravityapi.network.UpdateGravitySyncStatePacket;
 import com.min01.gravityapi.util.GCUtil;
 import com.min01.gravityapi.util.RotationUtil;
 
@@ -79,12 +80,10 @@ public class GravityCapabilityImpl implements IGravityCapability {
     private @Nullable GravityCapabilityImpl.GravityDirEffect delayApplyDirEffect = null;
     private double delayApplyStrengthEffect = 1.0;
     
-    // if it equals entity.tickCount,
-    // it means that the gravity update event has already fired in this tick
-    private long lastUpdateTickCount = 0;
-    
     // only used on server side
-    private boolean needsSync = false;
+    public boolean needsSync = false;
+    
+    public boolean noAnimation = false;
     
 	@Override
 	public void setEntity(Entity entity) 
@@ -137,6 +136,7 @@ public class GravityCapabilityImpl implements IGravityCapability {
             prevGravityStrength = currGravityStrength;
             initialized = true;
             this.needsSync = true;
+            this.noAnimation = true;
             applyGravityDirectionChange(
                 prevGravityDirection, currGravityDirection, currentRotationParameters, true
             );
@@ -170,7 +170,6 @@ public class GravityCapabilityImpl implements IGravityCapability {
         
         if (!entity.level.isClientSide()) {
             if (needsSync) {
-                needsSync = false;
                 sendSyncPacketToOtherPlayers();
             }
         }
@@ -259,8 +258,6 @@ public class GravityCapabilityImpl implements IGravityCapability {
                 // if no effect is applied, reset the rotation parameters
                 currentRotationParameters = RotationParameters.getDefault();
             }
-            
-            lastUpdateTickCount = entity.tickCount;
         }
         
         if (sendPacketIfNecessary) {
@@ -276,16 +273,21 @@ public class GravityCapabilityImpl implements IGravityCapability {
     {
 		if(!this.entity.level.isClientSide)
 		{
-			GravityNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this.entity), new UpdateGravityCapabilityPacket(this.entity.getUUID(), baseGravityDirection, currGravityDirection, baseGravityStrength, currGravityStrength));
+			GravityNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this.entity), new UpdateGravityCapabilityPacket(this.noAnimation, this.entity.getUUID(), baseGravityDirection, currGravityDirection, baseGravityStrength, currGravityStrength));
 		}
     }
 	
-	public void sync(Direction baseGravityDirection, Direction currentGravityDirection, double baseGravityStrength, double currentGravityStrength)
+	public void sync(boolean noAnimation, Direction baseGravityDirection, Direction currentGravityDirection, double baseGravityStrength, double currentGravityStrength)
     {
 		this.baseGravityDirection = baseGravityDirection;
 		this.currGravityDirection = currentGravityDirection;
 		this.baseGravityStrength = baseGravityStrength;
 		this.currGravityStrength = currentGravityStrength;
+		if(noAnimation)
+		{
+			GravityChangerAPI.instantlySetClientBaseGravityDirection(this.entity, baseGravityDirection);
+		}
+		GravityNetwork.sendToServer(new UpdateGravitySyncStatePacket(this.entity.getUUID()));
     }
     
     public void applyGravityDirectionEffect(

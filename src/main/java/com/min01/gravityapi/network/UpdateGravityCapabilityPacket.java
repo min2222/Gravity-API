@@ -14,13 +14,15 @@ import net.minecraftforge.network.NetworkEvent;
 public class UpdateGravityCapabilityPacket 
 {
 	private final UUID entityUUID;
+	private final boolean noAnimation;
 	private final Direction baseGravityDirection;
 	private final Direction currentGravityDirection;
 	private final double baseGravityStrength;
 	private final double currentGravityStrength;
 	
-	public UpdateGravityCapabilityPacket(UUID entityUUID, Direction baseGravityDirection, Direction currentGravityDirection, double baseGravityStrength, double currentGravityStrength) 
+	public UpdateGravityCapabilityPacket(boolean noAnimation, UUID entityUUID, Direction baseGravityDirection, Direction currentGravityDirection, double baseGravityStrength, double currentGravityStrength) 
 	{
+		this.noAnimation = noAnimation;
 		this.entityUUID = entityUUID;
 		this.baseGravityDirection = baseGravityDirection;
 		this.currentGravityDirection = currentGravityDirection;
@@ -30,6 +32,7 @@ public class UpdateGravityCapabilityPacket
 
 	public UpdateGravityCapabilityPacket(FriendlyByteBuf buf)
 	{
+		this.noAnimation = buf.readBoolean();
 		this.entityUUID = buf.readUUID();
 		this.baseGravityDirection = buf.readEnum(Direction.class);
 		this.currentGravityDirection = buf.readEnum(Direction.class);
@@ -39,6 +42,7 @@ public class UpdateGravityCapabilityPacket
 
 	public void encode(FriendlyByteBuf buf)
 	{
+		buf.writeBoolean(this.noAnimation);
 		buf.writeUUID(this.entityUUID);
 		buf.writeEnum(this.baseGravityDirection);
 		buf.writeEnum(this.currentGravityDirection);
@@ -59,8 +63,7 @@ public class UpdateGravityCapabilityPacket
 						Entity entity = GCUtil.getEntityByUUID(level, message.entityUUID);
 						entity.getCapability(GravityCapabilities.GRAVITY).ifPresent(cap -> 
 						{
-							cap.sync(message.baseGravityDirection, message.currentGravityDirection, message.baseGravityStrength, message.currentGravityStrength);
-							cap.applyGravityChange();
+							cap.sync(message.noAnimation, message.baseGravityDirection, message.currentGravityDirection, message.baseGravityStrength, message.currentGravityStrength);
 						});
 					});
 				}

@@ -35,6 +35,21 @@ public class GCUtil {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public static Iterable<Entity> getAllEntities(Level level, UUID uuid)
+	{
+		try 
+		{
+			LevelEntityGetter<Entity> entities = (LevelEntityGetter<Entity>) GET_ENTITY.invoke(level);
+			return entities.getAll();
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Entity getEntityByUUID(Level level, UUID uuid)
 	{
 		try 
