@@ -2,9 +2,11 @@ package com.min01.gravityapi.event;
 
 import com.min01.gravityapi.GravityAPI;
 import com.min01.gravityapi.api.GravityChangerAPI;
+import com.min01.gravityapi.capabilities.GravityCapabilityImpl;
 import com.min01.gravityapi.config.GravityConfig;
 import com.min01.gravityapi.util.GCUtil;
 
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -33,12 +35,25 @@ public class CommonEvents
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event)
     {
+    	Player player = event.getEntity();
     	if(event.isWasDeath() && !GravityConfig.resetGravityOnRespawn.get())
     	{
         	Player original = event.getOriginal();
         	original.revive();
-        	Player player = event.getEntity();
         	GravityChangerAPI.setBaseGravityDirection(player, GravityChangerAPI.getBaseGravityDirection(original));
     	}
+		for(Entity entity : GCUtil.getAllEntities(player.level))
+		{
+			if(!entity.level.isClientSide)
+			{
+    			if(GravityChangerAPI.getBaseGravityDirection(entity) == Direction.DOWN)
+    			{
+    				continue;
+    			}
+    			GravityCapabilityImpl cap = GravityChangerAPI.getGravityComponent(entity);
+    			cap.initialized = false;
+				cap.deserializeNBT(cap.serializeNBT());
+			}
+		}
     }
 }

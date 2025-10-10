@@ -35,7 +35,7 @@ public class GCUtil {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Iterable<Entity> getAllEntities(Level level, UUID uuid)
+	public static Iterable<Entity> getAllEntities(Level level)
 	{
 		try 
 		{

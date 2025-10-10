@@ -51,7 +51,7 @@ import net.minecraftforge.network.PacketDistributor;
  * Other client entities' are synced from server.)
  */
 public class GravityCapabilityImpl implements IGravityCapability {
-    private boolean initialized = false;
+    public boolean initialized = false;
     
     // not synchronized
     private Direction prevGravityDirection = Direction.DOWN;
