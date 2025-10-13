@@ -49,18 +49,19 @@ public abstract class GameRendererMixin {
 	@Shadow
 	private boolean renderHand;
 
-	@Inject(method = "renderLevel", at = @At(value = "HEAD"), cancellable = true)
-	private void renderLevel(float p_109090_, long p_109091_, PoseStack p_109092_, CallbackInfo ci) {
-		if (this.mainCamera.getEntity() != null) {
-			Entity focusedEntity = this.mainCamera.getEntity();
-			Direction gravityDirection = GravityChangerAPI.getGravityDirection(focusedEntity);
-			RotationAnimation animation = GravityChangerAPI.getRotationAnimation(focusedEntity);
-			if (animation == null) {
-				return;
-			}
-			ci.cancel();
-			long timeMs = focusedEntity.level().getGameTime() * 50 + (long) (p_109090_ * 50);
-			Quaternionf currentGravityRotation = animation.getCurrentGravityRotation(gravityDirection, timeMs);
+    @Inject(method = "renderLevel", at = @At(value = "HEAD"), cancellable = true)
+    private void renderLevel(float p_109090_, long p_109091_, PoseStack p_109092_, CallbackInfo ci) {
+        if (this.mainCamera.getEntity() != null) {
+            Entity focusedEntity = this.mainCamera.getEntity();
+            Direction gravityDirection = GravityChangerAPI.getGravityDirection(focusedEntity);
+            RotationAnimation animation = GravityChangerAPI.getRotationAnimation(focusedEntity);
+            // Only override vanilla when a gravity transform/animation is active
+            if (animation == null || (gravityDirection == Direction.DOWN && !animation.isInAnimation())) {
+                return;
+            }
+            ci.cancel();
+            long timeMs = focusedEntity.level().getGameTime() * 50 + (long) (p_109090_ * 50);
+            Quaternionf currentGravityRotation = animation.getCurrentGravityRotation(gravityDirection, timeMs);
 
 			if (animation.isInAnimation()) {
 				// make sure that frustum culling updates when running rotation animation
@@ -79,13 +80,9 @@ public abstract class GameRendererMixin {
 			this.minecraft.getProfiler().popPush("camera");
 			Camera camera = this.mainCamera;
 			this.renderDistance = (float) (this.minecraft.options.getEffectiveRenderDistance() * 16);
-			PoseStack posestack = new PoseStack();
-			double d0 = this.getFov(camera, p_109090_, true);
-			posestack.mulPoseMatrix(renderer.getProjectionMatrix(d0));
-			this.bobHurt(posestack, p_109090_);
-			if (this.minecraft.options.bobView().get()) {
-				this.bobView(posestack, p_109090_);
-			}
+            PoseStack posestack = new PoseStack();
+            double d0 = this.getFov(camera, p_109090_, true);
+            posestack.mulPoseMatrix(renderer.getProjectionMatrix(d0));
 
 			float f = this.minecraft.options.screenEffectScale().get().floatValue();
 			float f1 = Mth.lerp(p_109090_, this.minecraft.player.oSpinningEffectIntensity,
@@ -101,8 +98,8 @@ public abstract class GameRendererMixin {
 				posestack.mulPose(axis.rotationDegrees(f3));
 			}
 
-			Matrix4f matrix4f = posestack.last().pose();
-			renderer.resetProjectionMatrix(matrix4f);
+            Matrix4f matrix4f = posestack.last().pose();
+            renderer.resetProjectionMatrix(matrix4f);
 			camera.setup(this.minecraft.level,
 					(Entity) (this.minecraft.getCameraEntity() == null ? this.minecraft.player
 							: this.minecraft.getCameraEntity()),
@@ -112,13 +109,19 @@ public abstract class GameRendererMixin {
 			net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles cameraSetup = net.minecraftforge.client.ForgeHooksClient
 					.onCameraSetup(renderer, camera, p_109090_);
 			camera.setAnglesInternal(cameraSetup.getYaw(), cameraSetup.getPitch());
-			p_109092_.mulPose(Axis.ZP.rotationDegrees(cameraSetup.getRoll()));
+            p_109092_.mulPose(Axis.ZP.rotationDegrees(cameraSetup.getRoll()));
 
-			p_109092_.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
-			p_109092_.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
-			p_109092_.mulPose(currentGravityRotation);
-			Matrix3f matrix3f = (new Matrix3f(p_109092_.last().normal())).invert();
-			RenderSystem.setInverseViewRotationMatrix(matrix3f);
+            p_109092_.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+            p_109092_.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
+
+            this.bobHurt(p_109092_, p_109090_);
+            if (this.minecraft.options.bobView().get()) {
+                this.bobView(p_109092_, p_109090_);
+            }
+
+            p_109092_.mulPose(currentGravityRotation);
+            Matrix3f matrix3f = (new Matrix3f(p_109092_.last().normal())).invert();
+            RenderSystem.setInverseViewRotationMatrix(matrix3f);
 			this.minecraft.levelRenderer.prepareCullFrustum(p_109092_, camera.getPosition(), renderer.getProjectionMatrix(Math.max(d0, (double) this.minecraft.options.fov().get().intValue())));
 			this.minecraft.levelRenderer.renderLevel(p_109092_, p_109090_, p_109091_, flag, camera, renderer, this.lightTexture, matrix4f);
 			this.minecraft.getProfiler().popPush("forge_render_last");
