@@ -84,6 +84,7 @@ public class GravityCapabilityImpl implements IGravityCapability {
     public boolean needsSync = false;
     
     public boolean noAnimation = false;
+    public boolean noPositionAdjust = false;
     
 	@Override
 	public void setEntity(Entity entity) 
@@ -364,15 +365,18 @@ public class GravityCapabilityImpl implements IGravityCapability {
         Vec3 posTranslation = newPos.subtract(oldPos);
         Vec3 newLastTickPos = oldLastTickPos.add(posTranslation);
         
-        entity.setPos(newPos);
-        entity.xo = newLastTickPos.x;
-        entity.yo = newLastTickPos.y;
-        entity.zo = newLastTickPos.z;
-        entity.xOld = newLastTickPos.x;
-        entity.yOld = newLastTickPos.y;
-        entity.zOld = newLastTickPos.z;
-        
-        adjustEntityPosition(oldGravity, newGravity, entity.getBoundingBox());
+        if(!this.noPositionAdjust)
+        {
+            entity.setPos(newPos);
+            entity.xo = newLastTickPos.x;
+            entity.yo = newLastTickPos.y;
+            entity.zo = newLastTickPos.z;
+            entity.xOld = newLastTickPos.x;
+            entity.yOld = newLastTickPos.y;
+            entity.zOld = newLastTickPos.z;
+            
+            adjustEntityPosition(oldGravity, newGravity, entity.getBoundingBox());
+        }
         
         if (entity.level().isClientSide()) {
             Validate.notNull(animation, "gravity animation is null");
